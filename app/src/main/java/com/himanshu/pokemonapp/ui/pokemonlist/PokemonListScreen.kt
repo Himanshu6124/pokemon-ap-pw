@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -120,7 +121,7 @@ fun PokemonListItem(pokemon: Pokemon, imageUrl: String, onClick: () -> Unit) {
 
     ) {
         Column(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().height(200.dp),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -128,7 +129,7 @@ fun PokemonListItem(pokemon: Pokemon, imageUrl: String, onClick: () -> Unit) {
                 imageModel = imageUrl,
                 contentDescription = stringResource(R.string.pokemon_image),
                 modifier = Modifier
-                    .size(64.dp)
+                    .size(100.dp)
                     .padding(5.dp),
                 contentScale = ContentScale.Crop,
                 placeHolder = ImageBitmap.imageResource(R.drawable.loading_image),

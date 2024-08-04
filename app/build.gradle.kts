@@ -67,6 +67,8 @@ dependencies {
     ksp(libs.androidx.hilt.compiler)
     implementation(libs.androidx.hilt.navigation.compose)
 
+    /* to use splash screen API */
+    implementation (libs.androidx.core.splashscreen)
 
     /* to serialise JSON objects into Java objects */
     implementation (libs.converter.gson)
