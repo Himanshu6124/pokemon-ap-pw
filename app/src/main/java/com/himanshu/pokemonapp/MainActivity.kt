@@ -4,13 +4,14 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import com.himanshu.pokemonapp.ui.pokemondetail.PokemonDetailScreen
+import com.himanshu.pokemonapp.ui.pokemonlist.PokemonListScreen
 import com.himanshu.pokemonapp.ui.theme.PokemonAppTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -21,29 +22,28 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             PokemonAppTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+                Pokemon()
             }
         }
     }
 }
 
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
+fun Pokemon() {
+    val navController = rememberNavController()
 
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    PokemonAppTheme {
-        Greeting("Android")
+    NavHost(navController = navController, startDestination = "list") {
+        composable("list") {
+            PokemonListScreen(navController = navController)
+        }
+        composable(
+            "detail/{pokemonId}",
+            arguments = listOf(navArgument("pokemonId") { type = NavType.IntType })
+        ) { backStackEntry ->
+            val pokemonId = backStackEntry.arguments?.getInt("pokemonId")
+            pokemonId?.let {
+                PokemonDetailScreen(pokemonId = it)
+            }
+        }
     }
 }

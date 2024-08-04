@@ -1,4 +1,4 @@
-package com.himanshu.pokemonapp.ui.viewmodel
+package com.himanshu.pokemonapp.ui.pokemondetail
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
