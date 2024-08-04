@@ -2,6 +2,7 @@ package com.himanshu.pokemonapp.ui.pokemonlist
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -12,11 +13,14 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -43,27 +47,54 @@ fun PokemonListScreen(
     viewModel: PokemonListViewModel = hiltViewModel()
 ) {
     val pokemonList by viewModel.pokemonList.observeAsState(emptyList())
+    val isLoading by viewModel.isLoading.observeAsState(true)
+    val errorMessage by viewModel.errorMessage.observeAsState(null)
+
+    errorMessage?.let {
+        Snackbar(
+            action = {
+                TextButton(onClick = {  }) {
+                    Text("Dismiss")
+                }
+            },
+            modifier = Modifier.padding(8.dp)
+        ) { Text(it) }
+    }
+
 
     Scaffold(
         topBar = { TopBar() }
     ) { it ->
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(2),
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(it)
-        )
-        {
-            items(pokemonList) { pokemon ->
-                val id = pokemon.url.split("/").last { it.isNotEmpty() }.toInt()
-                val imageUrl =
-                    "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/$id.png"
-                PokemonListItem(pokemon, imageUrl) {
-                    navController.navigate("detail/$id")
+
+        Box(modifier = Modifier.fillMaxSize()) {
+            if (isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier
+                        .size(50.dp)
+                        .align(Alignment.Center)
+                )
+            } else {
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(2),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(it)
+                )
+                {
+                    items(pokemonList) { pokemon ->
+                        val id = pokemon.url.split("/").last { it.isNotEmpty() }.toInt()
+                        val imageUrl =
+                            "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/$id.png"
+                        PokemonListItem(pokemon, imageUrl) {
+                            navController.navigate("detail/$id")
+                        }
+                    }
                 }
             }
         }
     }
+
+
 }
 
 @Composable
