@@ -33,7 +33,7 @@ class PokemonDetailViewModel @Inject constructor(private val repository: Pokemon
                 _pokemonDetail.value = res
             } catch (ex: Exception) {
                 Log.e(tag, "exception occurred in get characters", ex)
-                _errorMessage.value = ex.message
+                _errorMessage.postValue(ex.message)
             } finally {
                 _isLoading.postValue(false)
             }

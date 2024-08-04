@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
@@ -22,8 +24,10 @@ import androidx.compose.material3.Snackbar
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -40,6 +44,7 @@ import androidx.navigation.NavController
 import com.himanshu.pokemonapp.R
 import com.himanshu.pokemonapp.data.model.Pokemon
 import com.skydoves.landscapist.glide.GlideImage
+import kotlinx.coroutines.flow.distinctUntilChanged
 
 @Composable
 fun PokemonListScreen(
@@ -49,25 +54,25 @@ fun PokemonListScreen(
     val pokemonList by viewModel.pokemonList.observeAsState(emptyList())
     val isLoading by viewModel.isLoading.observeAsState(true)
     val errorMessage by viewModel.errorMessage.observeAsState(null)
+    val listState = rememberLazyGridState()
 
+    // Handle error messages with a Snackbar
     errorMessage?.let {
         Snackbar(
-            action = {
-                TextButton(onClick = {  }) {
-                    Text("Dismiss")
-                }
-            },
             modifier = Modifier.padding(8.dp)
         ) { Text(it) }
     }
 
-
     Scaffold(
         topBar = { TopBar() }
-    ) { it ->
+    ) { paddingValues ->
 
-        Box(modifier = Modifier.fillMaxSize()) {
-            if (isLoading) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
+            if (isLoading && pokemonList.isEmpty()) {
                 CircularProgressIndicator(
                     modifier = Modifier
                         .size(50.dp)
@@ -75,12 +80,10 @@ fun PokemonListScreen(
                 )
             } else {
                 LazyVerticalGrid(
+                    state = listState,
                     columns = GridCells.Fixed(2),
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(it)
-                )
-                {
+                    modifier = Modifier.fillMaxSize()
+                ) {
                     items(pokemonList) { pokemon ->
                         val id = pokemon.url.split("/").last { it.isNotEmpty() }.toInt()
                         val imageUrl =
@@ -90,11 +93,20 @@ fun PokemonListScreen(
                         }
                     }
                 }
+
+                // Scroll listener to load more data when the user scrolls to the bottom
+                LaunchedEffect(listState) {
+                    snapshotFlow { listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index }
+                        .distinctUntilChanged()
+                        .collect { index ->
+                            if (index == pokemonList.size - 1 && !isLoading) {
+                                viewModel.loadMorePokemon()
+                            }
+                        }
+                }
             }
         }
     }
-
-
 }
 
 @Composable

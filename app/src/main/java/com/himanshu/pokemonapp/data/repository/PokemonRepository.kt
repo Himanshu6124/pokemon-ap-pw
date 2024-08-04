@@ -6,7 +6,7 @@ import com.himanshu.pokemonapp.data.network.PokemonApiService
 import javax.inject.Inject
 
 class PokemonRepository @Inject constructor(private val apiService: PokemonApiService) {
-    suspend fun getPokemonList(): List<Pokemon> = apiService.getPokemonList().results
+    suspend fun getPokemonList(offset: Int, limit: Int): List<Pokemon> = apiService.getPokemonList(offset,limit).results
 
     suspend fun getPokemonDetail(id: Int): PokemonDetail = apiService.getPokemonDetail(id)
 }

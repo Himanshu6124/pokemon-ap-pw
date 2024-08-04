@@ -22,21 +22,37 @@ class PokemonListViewModel @Inject constructor(private val repository: PokemonRe
 
     private val _errorMessage = MutableLiveData<String?>()
     val errorMessage: LiveData<String?> = _errorMessage
+    private var currentPage = 0
 
     init {
-        viewModelScope.launch {
-            try {
-                _isLoading.postValue(true)
-                val res = repository.getPokemonList()
-                Log.d(tag, res.toString())
-                _pokemonList.value = res
+        loadMorePokemon()
+    }
 
-            } catch (ex: Exception) {
+    fun loadMorePokemon() {
+        if (isLoading.value == true) return
+        _isLoading.value = true
+        viewModelScope.launch {
+
+            try {
+                val offset = currentPage * PAGE_SIZE
+                val response = repository.getPokemonList(offset, PAGE_SIZE)
+                Log.d(tag, response.toString())
+                val currentList = pokemonList.value ?: emptyList()
+                _pokemonList.postValue(currentList + response)
+                currentPage++
+            }
+            catch (ex : Exception){
                 Log.e(tag, "exception occurred in get characters", ex)
-                _errorMessage.value = ex.message
-            } finally {
+                _errorMessage.postValue(ex.message)
+            }
+            finally {
                 _isLoading.postValue(false)
             }
+
         }
+    }
+    companion object{
+        const val PAGE_SIZE = 20
+
     }
 }
