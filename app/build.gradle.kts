@@ -74,7 +74,8 @@ dependencies {
     /* to use retrofit library */
     implementation(libs.retrofit)
 
-
+    /* to use Glide library */
+    implementation(libs.landscapist.glide)
 
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)

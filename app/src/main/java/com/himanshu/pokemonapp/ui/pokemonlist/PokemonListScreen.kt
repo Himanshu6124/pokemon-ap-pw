@@ -1,21 +1,41 @@
 package com.himanshu.pokemonapp.ui.pokemonlist
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Card
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.imageResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.himanshu.pokemonapp.R
 import com.himanshu.pokemonapp.data.model.Pokemon
+import com.skydoves.landscapist.glide.GlideImage
 
 @Composable
 fun PokemonListScreen(
@@ -24,28 +44,70 @@ fun PokemonListScreen(
 ) {
     val pokemonList by viewModel.pokemonList.observeAsState(emptyList())
 
-    LazyColumn {
-        items(pokemonList) { pokemon ->
-            PokemonListItem(pokemon) {
+    Scaffold(
+        topBar = { TopBar() }
+    ) { it ->
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(2),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(it)
+        )
+        {
+            items(pokemonList) { pokemon ->
                 val id = pokemon.url.split("/").last { it.isNotEmpty() }.toInt()
-                navController.navigate("detail/$id")
+                val imageUrl =
+                    "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/$id.png"
+                PokemonListItem(pokemon, imageUrl) {
+                    navController.navigate("detail/$id")
+                }
             }
         }
     }
 }
 
 @Composable
-fun PokemonListItem(pokemon: Pokemon, onClick: () -> Unit) {
-    Card(
+fun PokemonListItem(pokemon: Pokemon, imageUrl: String, onClick: () -> Unit) {
+    ElevatedCard(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp)
+            .padding(20.dp, 12.dp)
             .clickable { onClick() },
+        shape = RoundedCornerShape(20)
+
     ) {
-        Text(
-            text = pokemon.name,
-            modifier = Modifier.padding(16.dp),
-            style = MaterialTheme.typography.headlineSmall
-        )
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            GlideImage(
+                imageModel = imageUrl,
+                contentDescription = stringResource(R.string.pokemon_image),
+                modifier = Modifier
+                    .size(64.dp)
+                    .padding(5.dp),
+                contentScale = ContentScale.Crop,
+                placeHolder = ImageBitmap.imageResource(R.drawable.loading_image),
+                error = ImageVector.vectorResource(R.drawable.error_image)
+            )
+            Text(
+                text = pokemon.name.replaceFirstChar { it.uppercaseChar() },
+                modifier = Modifier.padding(8.dp),
+                color = Color.DarkGray,
+                style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold)
+            )
+        }
     }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun TopBar() {
+    CenterAlignedTopAppBar(title = {
+        Text(
+            text = "Pokemon List",
+            style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold)
+        )
+    })
 }
