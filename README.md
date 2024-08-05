@@ -6,7 +6,7 @@ This is an Android application that displays a list of characters from the Pokem
 [Link to demo video](https://drive.google.com/file/d/1F7nYMmLZUUjehjmnsj6tVNYY0emsN3XJ/view?usp=sharing)
 
 ## Apk Link
-[Link to Apk ](https://drive.google.com/file/d/17x-hjTD1p2RR2yZrxzVIDzt78qIxhDBn/view?usp=sharing)
+[Link to Apk ](https://drive.google.com/file/d/17rT2JHwDV-aOu_bTaXS5VW2Zh9RrZeFc/view?usp=sharing)
 
 ## Table of Contents
 - [Features](#features)
