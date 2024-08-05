@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.LinearProgressIndicator
@@ -31,7 +32,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -100,8 +100,14 @@ fun PokemonDetailView(pokemonDetail: PokemonDetail) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp),
-        shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+        shape = RoundedCornerShape(30.dp),
+        colors = CardColors(
+            containerColor = MaterialTheme.colorScheme.onPrimary,
+            contentColor = MaterialTheme.colorScheme.primary,
+            disabledContainerColor = MaterialTheme.colorScheme.onTertiary,
+            disabledContentColor = MaterialTheme.colorScheme.onSecondary
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 50.dp)
     ) {
         Column(
             modifier = Modifier
@@ -123,7 +129,7 @@ fun PokemonDetailView(pokemonDetail: PokemonDetail) {
                 text = pokemonDetail.name.replaceFirstChar { it.uppercaseChar() },
                 style = MaterialTheme.typography.headlineLarge.copy(
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary
+                    color = MaterialTheme.colorScheme.secondary
                 ),
                 modifier = Modifier.align(alignment = Alignment.CenterHorizontally)
             )
@@ -178,7 +184,7 @@ fun Abilities(abilities: List<SingleAbility> = emptyList()) {
                 text = ability.ability.name.replaceFirstChar { it.uppercaseChar() },
                 style = MaterialTheme.typography.bodySmall.copy(
                     fontSize = 14.sp,
-                    color = Color.Gray
+                    color = MaterialTheme.colorScheme.primary
                 ),
                 modifier = Modifier.padding(vertical = 4.dp)
             )
@@ -191,7 +197,7 @@ fun Stats(stats: List<Stat> = emptyList()) {
     Text(
         text = "Stats",
         style = MaterialTheme.typography.headlineSmall.copy(
-            fontWeight = FontWeight.SemiBold,
+            fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.secondary
         ),
         modifier = Modifier.padding(start = 16.dp)
@@ -209,7 +215,10 @@ fun Stats(stats: List<Stat> = emptyList()) {
             ) {
                 Text(
                     text = stat.stat.name.replaceFirstChar { it.uppercase() },
-                    style = MaterialTheme.typography.bodyMedium.copy(fontSize = 14.sp),
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Bold
+                    ),
                     modifier = Modifier.width(100.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
@@ -261,7 +270,7 @@ fun Stats(stats: List<Stat> = emptyList()) {
             text = "$totalBaseStat / $maxBaseStat",
             style = MaterialTheme.typography.bodyMedium.copy(
                 fontSize = 14.sp,
-                color = Color.Gray
+                color = MaterialTheme.colorScheme.primary
             ),
             modifier = Modifier.align(Alignment.CenterHorizontally)
         )
