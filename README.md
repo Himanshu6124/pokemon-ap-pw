@@ -3,7 +3,7 @@
 This is an Android application that displays a list of characters from the Pokemon series using the Poke API and Jetpack libraries. The app follows the MVVM (Model-View-ViewModel) architecture for better separation of concerns and maintainability.
 
 ## Demo Video
-[Link to demo video](https://drive.google.com/file/d/1F7nYMmLZUUjehjmnsj6tVNYY0emsN3XJ/view?usp=sharing)
+[Link to demo video](https://drive.google.com/file/d/1FDgaGRRSiPUgvdeNVaeTF_NLzaLDi6zW/view?usp=drivesdk)
 
 ## Apk Link
 [Link to Apk ](https://drive.google.com/file/d/17rT2JHwDV-aOu_bTaXS5VW2Zh9RrZeFc/view?usp=sharing)
@@ -39,7 +39,7 @@ The app is structured following the MVVM architecture pattern for better organiz
 
 
 ## Installation
-1. Clone the repository: git clone https://github.com/Himanshu6124/rick-and-morty-ridecell-assignment
+1. Clone the repository: git clone https://github.com/Himanshu6124/pokemon-ap-pw
 2. Open the project in Android Studio.
 3. Checkout the `main` branch.
 4. Sync the project with Gradle files.
