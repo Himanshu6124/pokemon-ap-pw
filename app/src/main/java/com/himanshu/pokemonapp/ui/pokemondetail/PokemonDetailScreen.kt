@@ -1,7 +1,6 @@
 package com.himanshu.pokemonapp.ui.pokemondetail
 
 import android.util.Log
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,9 +15,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -34,11 +31,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -95,17 +92,6 @@ fun PokemonDetailScreen(pokemonId: Int, viewModel: PokemonDetailViewModel = hilt
             }
         }
     }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun TopBar(pokemonName: String) {
-    CenterAlignedTopAppBar(title = {
-        Text(
-            text = pokemonName.replaceFirstChar { it.uppercaseChar() },
-            style = MaterialTheme.typography.headlineLarge.copy(fontWeight = FontWeight.Bold)
-        )
-    })
 }
 
 @Composable
@@ -189,7 +175,7 @@ fun Abilities(abilities: List<SingleAbility> = emptyList()) {
     Column(modifier = Modifier.padding(start = 16.dp, end = 16.dp)) {
         abilities.forEach { ability ->
             Text(
-                text = ability.ability.name,
+                text = ability.ability.name.replaceFirstChar { it.uppercaseChar() },
                 style = MaterialTheme.typography.bodySmall.copy(
                     fontSize = 14.sp,
                     color = Color.Gray
@@ -213,21 +199,20 @@ fun Stats(stats: List<Stat> = emptyList()) {
 
     Spacer(modifier = Modifier.height(8.dp))
 
-    Column(modifier = Modifier.padding(start = 16.dp, end = 16.dp)) {
-
+    Column(modifier = Modifier.padding(horizontal = 16.dp)) {
         stats.forEach { stat ->
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 4.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
                     text = stat.stat.name.replaceFirstChar { it.uppercase() },
-                    style = MaterialTheme.typography.bodyMedium.copy(fontSize = 14.sp)
+                    style = MaterialTheme.typography.bodyMedium.copy(fontSize = 14.sp),
+                    modifier = Modifier.width(100.dp)
                 )
-                Spacer(modifier = Modifier.width(16.dp))
+                Spacer(modifier = Modifier.width(8.dp))
                 LinearProgressIndicator(
                     progress = { stat.baseStat / 100f },
                     modifier = Modifier
@@ -236,12 +221,49 @@ fun Stats(stats: List<Stat> = emptyList()) {
                         .clip(RoundedCornerShape(4.dp)),
                     color = MaterialTheme.colorScheme.primary,
                 )
-                Spacer(modifier = Modifier.width(16.dp))
+                Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = stat.baseStat.toString(),
-                    style = MaterialTheme.typography.bodyMedium.copy(fontSize = 14.sp)
+                    style = MaterialTheme.typography.bodyMedium.copy(fontSize = 14.sp),
+                    modifier = Modifier.width(30.dp),
+                    textAlign = TextAlign.End
                 )
             }
         }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Calculate total progress
+        val totalBaseStat = stats.sumOf { it.baseStat }
+        val maxBaseStat = stats.size * 100
+        val totalProgress = totalBaseStat / maxBaseStat.toFloat()
+
+        Text(
+            text = "Total Progress",
+            style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold),
+            modifier = Modifier.align(Alignment.CenterHorizontally)
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        LinearProgressIndicator(
+            progress = { totalProgress },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(8.dp)
+                .clip(RoundedCornerShape(4.dp)),
+            color = MaterialTheme.colorScheme.primary,
+        )
+
+        Spacer(modifier = Modifier.height(4.dp))
+
+        Text(
+            text = "$totalBaseStat / $maxBaseStat",
+            style = MaterialTheme.typography.bodyMedium.copy(
+                fontSize = 14.sp,
+                color = Color.Gray
+            ),
+            modifier = Modifier.align(Alignment.CenterHorizontally)
+        )
     }
 }
