@@ -1,8 +1,9 @@
-package com.himanshu.pokemonapp.data.network
+package com.himanshu.pokemonapp.di
 
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
+import com.himanshu.pokemonapp.data.network.PokemonApiService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

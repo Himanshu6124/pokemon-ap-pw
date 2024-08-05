@@ -187,10 +187,12 @@ fun PokemonListItem(pokemon: Pokemon, imageUrl: String, onClick: () -> Unit) {
 @Composable
 fun TopBar() {
     CenterAlignedTopAppBar(
+        modifier = Modifier.padding(20.dp),
         title = {
             Image(
                 painter = painterResource(id = R.drawable.ic_launcher_foreground),
-                contentDescription = stringResource(R.string.app_name)
+                contentDescription = stringResource(R.string.app_name),
+                modifier = Modifier.fillMaxSize()
             )
         }
     )
