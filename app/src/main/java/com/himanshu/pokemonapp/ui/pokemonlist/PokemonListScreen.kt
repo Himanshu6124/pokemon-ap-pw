@@ -148,7 +148,7 @@ fun PokemonListItem(pokemon: Pokemon, imageUrl: String, onClick: () -> Unit) {
                     .size(120.dp)  // Increase size for better visibility
                     .clip(RoundedCornerShape(12.dp))  // Add rounded corners
                     .border(
-                        2.dp,
+                        3.dp,
                         MaterialTheme.colorScheme.primaryContainer,
                         RoundedCornerShape(50)
                     )  // Add border

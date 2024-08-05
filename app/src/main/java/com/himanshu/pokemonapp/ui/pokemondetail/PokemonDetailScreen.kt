@@ -1,6 +1,12 @@
 package com.himanshu.pokemonapp.ui.pokemondetail
 
-import android.util.Log
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,7 +21,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.LinearProgressIndicator
@@ -33,6 +38,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -59,7 +65,6 @@ fun PokemonDetailScreen(pokemonId: Int, viewModel: PokemonDetailViewModel = hilt
 
     LaunchedEffect(key1 = errorMessage) {
         errorMessage?.let {
-            Log.i("PokemonDetailViewModel", "error in launch effect")
             snackBarHostState.showSnackbar(
                 message = errorMessage!!,
                 duration = SnackbarDuration.Short,
@@ -105,16 +110,24 @@ fun PokemonDetailScreen(pokemonId: Int, viewModel: PokemonDetailViewModel = hilt
 
 @Composable
 fun PokemonDetailView(pokemonDetail: PokemonDetail) {
+    val imageScale = remember { Animatable(0f) }
+    val textOpacity = remember { Animatable(0f) }
+
+    LaunchedEffect(Unit) {
+        textOpacity.animateTo(1f, animationSpec = tween(durationMillis = 800))
+    }
+    LaunchedEffect(Unit) {
+        imageScale.animateTo(1f, animationSpec = tween(durationMillis = 800))
+    }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp),
         shape = RoundedCornerShape(30.dp),
-        colors = CardColors(
+        colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.onPrimary,
-            contentColor = MaterialTheme.colorScheme.primary,
-            disabledContainerColor = MaterialTheme.colorScheme.onTertiary,
-            disabledContentColor = MaterialTheme.colorScheme.onSecondary
+            contentColor = MaterialTheme.colorScheme.primary
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 50.dp)
     ) {
@@ -128,7 +141,8 @@ fun PokemonDetailView(pokemonDetail: PokemonDetail) {
                 contentDescription = stringResource(id = R.string.pokemon_image),
                 modifier = Modifier
                     .size(128.dp)
-                    .align(alignment = Alignment.CenterHorizontally),
+                    .align(alignment = Alignment.CenterHorizontally)
+                    .graphicsLayer(imageScale.value),
                 contentScale = ContentScale.Crop
             )
 
@@ -140,7 +154,9 @@ fun PokemonDetailView(pokemonDetail: PokemonDetail) {
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.secondary
                 ),
-                modifier = Modifier.align(alignment = Alignment.CenterHorizontally)
+                modifier = Modifier
+                    .align(alignment = Alignment.CenterHorizontally)
+                    .graphicsLayer(alpha = textOpacity.value)
             )
 
             Spacer(modifier = Modifier.height(20.dp))
@@ -167,7 +183,6 @@ fun PokemonDetailView(pokemonDetail: PokemonDetail) {
             }
 
             Spacer(modifier = Modifier.height(16.dp))
-            Spacer(modifier = Modifier.height(8.dp))
             Abilities(abilities = pokemonDetail.abilities)
             Spacer(modifier = Modifier.height(16.dp))
             Stats(stats = pokemonDetail.stats)
@@ -177,44 +192,53 @@ fun PokemonDetailView(pokemonDetail: PokemonDetail) {
 
 @Composable
 fun Abilities(abilities: List<SingleAbility> = emptyList()) {
+    val enterTransition =
+        fadeIn(tween(durationMillis = 500)) + slideInVertically(tween(durationMillis = 500))
+    val exitTransition =
+        fadeOut(tween(durationMillis = 500)) + slideOutVertically(tween(durationMillis = 500))
 
-    Text(
-        text = "Abilities :",
-        style = MaterialTheme.typography.titleMedium.copy(
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.secondary
-        ),
-        modifier = Modifier.padding(start = 16.dp)
-    )
-
-    Column(modifier = Modifier.padding(start = 16.dp, end = 16.dp)) {
-        abilities.forEach { ability ->
+    AnimatedVisibility(
+        visible = abilities.isNotEmpty(),
+        enter = enterTransition,
+        exit = exitTransition
+    ) {
+        Column(modifier = Modifier.padding(start = 16.dp, end = 16.dp)) {
             Text(
-                text = ability.ability.name.replaceFirstChar { it.uppercaseChar() },
-                style = MaterialTheme.typography.bodySmall.copy(
-                    fontSize = 14.sp,
-                    color = MaterialTheme.colorScheme.primary
+                text = "Abilities :",
+                style = MaterialTheme.typography.headlineSmall.copy(
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.secondary
                 ),
-                modifier = Modifier.padding(vertical = 4.dp)
             )
+
+            abilities.forEach { ability ->
+                Text(
+                    text = ability.ability.name.replaceFirstChar { it.uppercaseChar() },
+                    style = MaterialTheme.typography.bodySmall.copy(
+                        fontSize = 14.sp,
+                        color = MaterialTheme.colorScheme.primary
+                    ),
+                    modifier = Modifier.padding(vertical = 4.dp)
+                )
+            }
         }
     }
 }
 
 @Composable
 fun Stats(stats: List<Stat> = emptyList()) {
-    Text(
-        text = "Stats",
-        style = MaterialTheme.typography.headlineSmall.copy(
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.secondary
-        ),
-        modifier = Modifier.padding(start = 16.dp)
-    )
-
-    Spacer(modifier = Modifier.height(8.dp))
 
     Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+        Text(
+            text = "Stats :",
+            style = MaterialTheme.typography.headlineSmall.copy(
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.secondary
+            ),
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
         stats.forEach { stat ->
             Row(
                 modifier = Modifier
