@@ -39,6 +39,8 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.himanshu.pokemonapp.R
 import com.himanshu.pokemonapp.data.model.PokemonDetail
+import com.himanshu.pokemonapp.data.model.SingleAbility
+import com.himanshu.pokemonapp.data.model.Stat
 import com.skydoves.landscapist.glide.GlideImage
 
 @Composable
@@ -128,7 +130,7 @@ fun PokemonDetailView(pokemonDetail: PokemonDetail) {
 
             Text(
                 text = pokemonDetail.name.replaceFirstChar { it.uppercaseChar() },
-                style = MaterialTheme.typography.headlineMedium.copy(
+                style = MaterialTheme.typography.headlineLarge.copy(
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary
                 ),
@@ -159,29 +161,73 @@ fun PokemonDetailView(pokemonDetail: PokemonDetail) {
             }
 
             Spacer(modifier = Modifier.height(16.dp))
-
-            Text(
-                text = "Abilities :",
-                style = MaterialTheme.typography.titleMedium.copy(
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.secondary
-                ),
-                modifier = Modifier.padding(start = 16.dp)
-            )
-
             Spacer(modifier = Modifier.height(8.dp))
+            Abilities(abilities = pokemonDetail.abilities)
+            Spacer(modifier = Modifier.height(16.dp))
+            Stats(stats = pokemonDetail.stats)
+        }
+    }
+}
 
-            Column(modifier = Modifier.padding(start = 16.dp, end = 16.dp)) {
-                pokemonDetail.abilities.forEach { ability ->
-                    Text(
-                        text = ability.ability.name,
-                        style = MaterialTheme.typography.bodySmall.copy(
-                            fontSize = 14.sp,
-                            color = Color.Gray
-                        ),
-                        modifier = Modifier.padding(vertical = 4.dp)
-                    )
-                }
+@Composable
+fun Abilities(abilities: List<SingleAbility> = emptyList()) {
+
+    Text(
+        text = "Abilities :",
+        style = MaterialTheme.typography.titleMedium.copy(
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.secondary
+        ),
+        modifier = Modifier.padding(start = 16.dp)
+    )
+
+    Column(modifier = Modifier.padding(start = 16.dp, end = 16.dp)) {
+        abilities.forEach { ability ->
+            Text(
+                text = ability.ability.name,
+                style = MaterialTheme.typography.bodySmall.copy(
+                    fontSize = 14.sp,
+                    color = Color.Gray
+                ),
+                modifier = Modifier.padding(vertical = 4.dp)
+            )
+        }
+    }
+}
+
+@Composable
+fun Stats(stats: List<Stat> = emptyList()) {
+    Text(
+        text = "Stats",
+        style = MaterialTheme.typography.headlineLarge.copy(
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.secondary
+        ),
+        modifier = Modifier.padding(start = 16.dp)
+    )
+
+    Spacer(modifier = Modifier.height(8.dp))
+
+    Column(modifier = Modifier.padding(start = 16.dp, end = 16.dp)) {
+        stats.forEach { stat ->
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = stat.stat.name.replaceFirstChar { it.uppercase() },
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold
+                    ),
+                    color = Color.Gray
+                )
+                Text(
+                    text = stat.baseStat.toString(),
+                    style = MaterialTheme.typography.bodyMedium.copy(fontSize = 14.sp)
+                )
             }
         }
     }
