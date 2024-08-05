@@ -11,48 +11,75 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+
+/* ViewModel responsible for managing and providing data for the Pokemon list */
 @HiltViewModel
-class PokemonListViewModel @Inject constructor(private val repository: PokemonRepository) :
-    ViewModel() {
-    private val tag = "PokemonListViewModel"
+class PokemonListViewModel @Inject constructor(
+    private val repository: PokemonRepository
+) : ViewModel() {
+
+    private val logTag = "PokemonListViewModel"
+
+    /* LiveData to hold the list of Pokémon */
     private val _pokemonList = MutableLiveData<List<Pokemon>>()
     val pokemonList: LiveData<List<Pokemon>> get() = _pokemonList
-    private val _isLoading = MutableLiveData<Boolean>()
-    val isLoading: LiveData<Boolean> = _isLoading
 
+    /* LiveData to indicate loading state */
+    private val _isLoading = MutableLiveData<Boolean>()
+    val isLoading: LiveData<Boolean> get() = _isLoading
+
+    /* LiveData to hold any error messages */
     private val _errorMessage = MutableLiveData<String?>()
-    val errorMessage: LiveData<String?> = _errorMessage
+    val errorMessage: LiveData<String?> get() = _errorMessage
+
+    /* Flag to indicate if more data is available */
+    private val _hasMoreData = MutableLiveData(true)
+
+    /* Current page for pagination */
     private var currentPage = 0
 
     init {
-        loadMorePokemon()
+        /* Load the initial list of Pokémon */
+        loadPokemon()
     }
 
-    fun loadMorePokemon() {
-        if (_isLoading.value == true) return
+    /**
+     * Loads more Pokémon and updates the LiveData.
+     * Handles pagination and error cases.
+     */
+    fun loadPokemon() {
+        /* Return if a load operation is already in progress */
+        if (_isLoading.value == true || _hasMoreData.value == false) return
+
         _isLoading.value = true
         viewModelScope.launch {
-
             try {
+                /* Calculate the offset based on the current page */
                 val offset = currentPage * PAGE_SIZE
                 val response = repository.getPokemonList(offset, PAGE_SIZE)
-                Log.d(tag, response.toString())
-                val currentList = pokemonList.value ?: emptyList()
+                Log.d(logTag, response.toString())
+
+                // Check if there is more data to load
+                _hasMoreData.postValue(response.isNotEmpty())
+
+                // Update the Pokémon list with the new data
+                val currentList = _pokemonList.value ?: emptyList()
                 _pokemonList.postValue(currentList + response)
+
+                // Increment the page count for the next load
                 currentPage++
-            }
-            catch (ex : Exception){
-                Log.e(tag, "exception occurred in get characters", ex)
-                _errorMessage.postValue(ex.message)
-            }
-            finally {
+            } catch (exception: Exception) {
+                Log.e(logTag, "Error occurred while fetching Pokémon", exception)
+                _errorMessage.postValue(exception.message)
+            } finally {
+                // Reset loading state
                 _isLoading.postValue(false)
             }
-
         }
     }
-    companion object{
-        const val PAGE_SIZE = 20
 
+    companion object {
+        // Constant for the number of items per page
+        const val PAGE_SIZE = 20
     }
 }

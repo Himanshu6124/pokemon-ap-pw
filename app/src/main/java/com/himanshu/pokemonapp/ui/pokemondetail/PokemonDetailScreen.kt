@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -53,55 +52,48 @@ import com.himanshu.pokemonapp.data.model.Stat
 import com.skydoves.landscapist.glide.GlideImage
 
 @Composable
-fun PokemonDetailScreen(pokemonId: Int, viewModel: PokemonDetailViewModel = hiltViewModel()) {
+fun PokemonDetailScreen(
+    pokemonId: Int,
+    viewModel: PokemonDetailViewModel = hiltViewModel()
+) {
+    // Observe Pokémon detail, loading state, and error message
     val pokemonDetail by viewModel.pokemonDetail.observeAsState()
     val isLoading by viewModel.isLoading.observeAsState(true)
     val errorMessage by viewModel.errorMessage.observeAsState(null)
     val snackBarHostState = remember { SnackbarHostState() }
 
-    LaunchedEffect(Unit) {
+    // Load Pokémon details when screen is first displayed
+    LaunchedEffect(pokemonId) {
         viewModel.loadPokemonDetail(pokemonId)
     }
 
-    LaunchedEffect(key1 = errorMessage) {
+    // Show error message in a SnackBar if there's any
+    LaunchedEffect(errorMessage) {
         errorMessage?.let {
             snackBarHostState.showSnackbar(
-                message = errorMessage!!,
-                duration = SnackbarDuration.Short,
+                message = it,
+                duration = SnackbarDuration.Short
             )
         }
     }
 
+    // Main layout for the screen
     Scaffold(
-        snackbarHost = { SnackbarHost(hostState = snackBarHostState) },
+        snackbarHost = { SnackbarHost(hostState = snackBarHostState) }
     ) { paddingValues ->
 
-        Box(modifier = Modifier.fillMaxSize()) {
-
+        Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
             if (isLoading) {
+                // Display a progress indicator while loading
                 CircularProgressIndicator(
                     modifier = Modifier
                         .size(50.dp)
                         .align(Alignment.Center)
                 )
             } else {
-
+                // Display Pokémon details when available
                 pokemonDetail?.let { detail ->
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(paddingValues)
-                    ) {
-                        LazyColumn(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(10.dp)
-                        ) {
-                            item {
-                                PokemonDetailView(pokemonDetail = detail)
-                            }
-                        }
-                    }
+                    PokemonDetailCard(pokemonDetail = detail)
                 }
             }
         }
@@ -109,15 +101,14 @@ fun PokemonDetailScreen(pokemonId: Int, viewModel: PokemonDetailViewModel = hilt
 }
 
 @Composable
-fun PokemonDetailView(pokemonDetail: PokemonDetail) {
+fun PokemonDetailCard(pokemonDetail: PokemonDetail) {
     val imageScale = remember { Animatable(0f) }
     val textOpacity = remember { Animatable(0f) }
 
-    LaunchedEffect(Unit) {
-        textOpacity.animateTo(1f, animationSpec = tween(durationMillis = 800))
-    }
+    // Animate image scale and text opacity
     LaunchedEffect(Unit) {
         imageScale.animateTo(1f, animationSpec = tween(durationMillis = 800))
+        textOpacity.animateTo(1f, animationSpec = tween(durationMillis = 800))
     }
 
     Card(
@@ -136,18 +127,20 @@ fun PokemonDetailView(pokemonDetail: PokemonDetail) {
                 .fillMaxWidth()
                 .padding(16.dp)
         ) {
+            // Pokémon image
             GlideImage(
                 imageModel = pokemonDetail.sprites.frontDefault,
-                contentDescription = stringResource(id = R.string.pokemon_image),
+                contentDescription = stringResource(R.string.pokemon_image),
                 modifier = Modifier
                     .size(128.dp)
-                    .align(alignment = Alignment.CenterHorizontally)
-                    .graphicsLayer(imageScale.value),
+                    .align(Alignment.CenterHorizontally)
+                    .graphicsLayer(scaleX = imageScale.value, scaleY = imageScale.value),
                 contentScale = ContentScale.Crop
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            // Pokémon name
             Text(
                 text = pokemonDetail.name.replaceFirstChar { it.uppercaseChar() },
                 style = MaterialTheme.typography.headlineLarge.copy(
@@ -155,12 +148,13 @@ fun PokemonDetailView(pokemonDetail: PokemonDetail) {
                     color = MaterialTheme.colorScheme.secondary
                 ),
                 modifier = Modifier
-                    .align(alignment = Alignment.CenterHorizontally)
+                    .align(Alignment.CenterHorizontally)
                     .graphicsLayer(alpha = textOpacity.value)
             )
 
             Spacer(modifier = Modifier.height(20.dp))
 
+            // Pokémon weight and height
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -170,32 +164,26 @@ fun PokemonDetailView(pokemonDetail: PokemonDetail) {
                 Text(
                     text = "Weight: ${pokemonDetail.weight}",
                     style = MaterialTheme.typography.bodyMedium.copy(fontSize = 16.sp),
-                    fontWeight = FontWeight.Bold,
+                    fontWeight = FontWeight.Bold
                 )
-
                 Text(
                     text = "Height: ${pokemonDetail.height}",
-                    style = MaterialTheme.typography.bodyMedium.copy(
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold,
-                    )
+                    style = MaterialTheme.typography.bodyMedium.copy(fontSize = 16.sp, fontWeight = FontWeight.Bold)
                 )
             }
 
             Spacer(modifier = Modifier.height(16.dp))
-            Abilities(abilities = pokemonDetail.abilities)
+            PokemonAbilities(abilities = pokemonDetail.abilities)
             Spacer(modifier = Modifier.height(16.dp))
-            Stats(stats = pokemonDetail.stats)
+            PokemonStats(stats = pokemonDetail.stats)
         }
     }
 }
 
 @Composable
-fun Abilities(abilities: List<SingleAbility> = emptyList()) {
-    val enterTransition =
-        fadeIn(tween(durationMillis = 500)) + slideInVertically(tween(durationMillis = 500))
-    val exitTransition =
-        fadeOut(tween(durationMillis = 500)) + slideOutVertically(tween(durationMillis = 500))
+fun PokemonAbilities(abilities: List<SingleAbility> = emptyList()) {
+    val enterTransition = fadeIn(tween(durationMillis = 500)) + slideInVertically(tween(durationMillis = 500))
+    val exitTransition = fadeOut(tween(durationMillis = 500)) + slideOutVertically(tween(durationMillis = 500))
 
     AnimatedVisibility(
         visible = abilities.isNotEmpty(),
@@ -204,11 +192,11 @@ fun Abilities(abilities: List<SingleAbility> = emptyList()) {
     ) {
         Column(modifier = Modifier.padding(start = 16.dp, end = 16.dp)) {
             Text(
-                text = "Abilities :",
+                text = "Abilities:",
                 style = MaterialTheme.typography.headlineSmall.copy(
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.secondary
-                ),
+                )
             )
 
             abilities.forEach { ability ->
@@ -226,15 +214,14 @@ fun Abilities(abilities: List<SingleAbility> = emptyList()) {
 }
 
 @Composable
-fun Stats(stats: List<Stat> = emptyList()) {
-
+fun PokemonStats(stats: List<Stat> = emptyList()) {
     Column(modifier = Modifier.padding(horizontal = 16.dp)) {
         Text(
-            text = "Stats :",
+            text = "Stats:",
             style = MaterialTheme.typography.headlineSmall.copy(
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.secondary
-            ),
+            )
         )
 
         Spacer(modifier = Modifier.height(8.dp))

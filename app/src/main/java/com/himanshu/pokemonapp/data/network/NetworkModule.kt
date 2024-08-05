@@ -3,7 +3,6 @@ package com.himanshu.pokemonapp.data.network
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
-import com.himanshu.pokemonapp.data.repository.PokemonRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -15,15 +14,15 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.io.File
 import javax.inject.Singleton
+import com.himanshu.pokemonapp.util.Constants.BASE_URL
+import com.himanshu.pokemonapp.util.Constants.CACHE_SIZE_BYTES
+import com.himanshu.pokemonapp.util.Constants.MAX_AGE_SECONDS
+import com.himanshu.pokemonapp.util.Constants.MAX_STALE_SECONDS
 
 @Module
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
 
-    private const val BASE_URL = "https://pokeapi.co/api/v2/" // Base url for end point
-    private const val CACHE_SIZE_BYTES = 10 * 1024 * 1024L // 10 MB cache size
-    private const val MAX_AGE_SECONDS = 300 // 5 minutes max age for cache
-    private const val MAX_STALE_SECONDS = 60 * 60 * 24 * 7 // 1 week max stale for cache
 
     /* Provides Retrofit instance configured with base URL, Gson converter, and OkHttpClient */
     @Provides

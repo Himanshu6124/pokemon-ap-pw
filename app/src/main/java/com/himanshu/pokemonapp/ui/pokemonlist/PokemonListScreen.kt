@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
@@ -53,6 +54,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.himanshu.pokemonapp.R
 import com.himanshu.pokemonapp.data.model.Pokemon
+import com.himanshu.pokemonapp.util.Helper.toPokemonImageUrl
 import com.skydoves.landscapist.glide.GlideImage
 import kotlinx.coroutines.flow.distinctUntilChanged
 
@@ -61,26 +63,28 @@ fun PokemonListScreen(
     navController: NavController,
     viewModel: PokemonListViewModel = hiltViewModel()
 ) {
+    /* Observe state from the ViewModel */
     val pokemonList by viewModel.pokemonList.observeAsState(emptyList())
     val isLoading by viewModel.isLoading.observeAsState(true)
     val errorMessage by viewModel.errorMessage.observeAsState(null)
     val listState = rememberLazyGridState()
     val snackBarHostState = remember { SnackbarHostState() }
 
+    /* Show snackBar if there's an error message */
     LaunchedEffect(key1 = errorMessage) {
         errorMessage?.let {
             snackBarHostState.showSnackbar(
-                message = errorMessage!!,
+                message = it,
                 duration = SnackbarDuration.Short,
             )
         }
     }
 
+    /* Scaffold layout with a top bar and a snackBar host */
     Scaffold(
         topBar = { TopBar() },
         snackbarHost = { SnackbarHost(hostState = snackBarHostState) },
     ) { paddingValues ->
-
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -93,31 +97,39 @@ fun PokemonListScreen(
                         .align(Alignment.Center)
                 )
             } else {
-                LazyVerticalGrid(
-                    state = listState,
-                    columns = GridCells.Fixed(2),
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    items(pokemonList) { pokemon ->
-                        val id = pokemon.url.split("/").last { it.isNotEmpty() }.toInt()
-                        val imageUrl =
-                            "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/$id.png"
-                        PokemonListItem(pokemon, imageUrl) {
-                            navController.navigate("detail/$id")
-                        }
-                    }
-                }
 
-                // Scroll listener to load more data when the user scrolls to the bottom
+                GridLayout(
+                    pokemonList = pokemonList,
+                    listState = listState,
+                    navController = navController
+                )
+                /* Scroll listener to load more data when the user scrolls to the bottom */
                 LaunchedEffect(listState) {
                     snapshotFlow { listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index }
                         .distinctUntilChanged()
                         .collect { index ->
                             if (index == pokemonList.size - 1 && !isLoading) {
-                                viewModel.loadMorePokemon()
+                                viewModel.loadPokemon()
                             }
                         }
                 }
+            }
+        }
+    }
+}
+
+@Composable
+fun GridLayout(pokemonList: List<Pokemon>, listState: LazyGridState, navController: NavController) {
+    LazyVerticalGrid(
+        state = listState,
+        columns = GridCells.Fixed(2),
+        modifier = Modifier.fillMaxSize()
+    ) {
+        items(pokemonList) { pokemon ->
+            val id = pokemon.url.split("/").last { it.isNotEmpty() }.toInt()
+            val imageUrl = id.toPokemonImageUrl()
+            PokemonListItem(pokemon, imageUrl) {
+                navController.navigate("pokemon_detail/$id")
             }
         }
     }
@@ -130,14 +142,14 @@ fun PokemonListItem(pokemon: Pokemon, imageUrl: String, onClick: () -> Unit) {
             .fillMaxWidth()
             .padding(16.dp)
             .clickable { onClick() }
-            .shadow(4.dp, RoundedCornerShape(20.dp)),  // Add shadow for depth
+            .shadow(4.dp, RoundedCornerShape(20.dp)), // Add shadow for depth
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White)  // Set background color
+        colors = CardDefaults.cardColors(containerColor = Color.White) // Set background color
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(220.dp),  // Increase height for better spacing
+                .height(220.dp), // Increase height for better spacing
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -145,19 +157,19 @@ fun PokemonListItem(pokemon: Pokemon, imageUrl: String, onClick: () -> Unit) {
                 imageModel = imageUrl,
                 contentDescription = stringResource(R.string.pokemon_image),
                 modifier = Modifier
-                    .size(120.dp)  // Increase size for better visibility
-                    .clip(RoundedCornerShape(12.dp))  // Add rounded corners
+                    .size(120.dp) // Increase size for better visibility
+                    .clip(RoundedCornerShape(12.dp)) // Add rounded corners
                     .border(
                         3.dp,
                         MaterialTheme.colorScheme.primaryContainer,
                         RoundedCornerShape(50)
-                    )  // Add border
-                    .padding(8.dp),  // Add padding inside image
+                    ) // Add border
+                    .padding(8.dp), // Add padding inside image
                 contentScale = ContentScale.Crop,
                 placeHolder = ImageBitmap.imageResource(R.drawable.loading_image),
                 error = ImageVector.vectorResource(R.drawable.error_image)
             )
-            Spacer(modifier = Modifier.height(20.dp))  // Add spacing between image and text
+            Spacer(modifier = Modifier.height(20.dp)) // Add spacing between image and text
             Text(
                 text = pokemon.name.replaceFirstChar { it.uppercaseChar() },
                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
@@ -174,10 +186,12 @@ fun PokemonListItem(pokemon: Pokemon, imageUrl: String, onClick: () -> Unit) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TopBar() {
-    CenterAlignedTopAppBar({
-        Image(
-            painter = painterResource(id = R.drawable.ic_launcher_foreground),
-            contentDescription = "Pokemon List",
-        )
-    })
+    CenterAlignedTopAppBar(
+        title = {
+            Image(
+                painter = painterResource(id = R.drawable.ic_launcher_foreground),
+                contentDescription = stringResource(R.string.app_name)
+            )
+        }
+    )
 }
