@@ -5,6 +5,9 @@ This is an Android application that displays a list of characters from the Pokem
 ## Demo Video
 [Link to demo video](https://drive.google.com/file/d/1F7nYMmLZUUjehjmnsj6tVNYY0emsN3XJ/view?usp=sharing)
 
+## Apk Link
+[Link to Apk ](https://drive.google.com/file/d/125yApySunXOQKK6nf9_xyFLuI3KfmbTt/view?usp=sharing)
+
 ## Table of Contents
 - [Features](#features)
 - [Architecture](#architecture)
@@ -15,7 +18,7 @@ This is an Android application that displays a list of characters from the Pokem
 ## Features
 - **Character List**: Displays a list of characters with their names and images.
 - **Character Details**: View detailed information about each character, including weight, height, abilities, stats, and total progress.
-- **Splash Screen**: Animated splash screen with scale-in animation.
+- **Splash Screen**: splash screen with logo redirecting to main screen .
 - **Offline Caching**: Caches API responses to provide offline support.
 
 ## Architecture
@@ -32,7 +35,7 @@ The app is structured following the MVVM architecture pattern for better organiz
 - **Glide**: An image loading and caching library for Android focused on smooth scrolling. Used to load character images.
 - **Gson**: A library to convert Java Objects into JSON and back. Used in conjunction with Retrofit for JSON parsing.
 - **OkHttp**: An HTTP client for Android and Kotlin applications. Used for implementing API response caching.
-- **Hilt**: Simplifies dependency injection by providing a set of standard components and annotations, which reduces boilerplate code and improves code maintainability.
+- **Dagger-Hilt**: Simplifies dependency injection by providing a set of standard components and annotations, which reduces boilerplate code and improves code maintainability.
 
 
 ## Installation
