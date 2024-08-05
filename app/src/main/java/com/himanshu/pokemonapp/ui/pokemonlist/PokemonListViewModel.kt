@@ -29,7 +29,7 @@ class PokemonListViewModel @Inject constructor(private val repository: PokemonRe
     }
 
     fun loadMorePokemon() {
-        if (isLoading.value == true) return
+        if (_isLoading.value == true) return
         _isLoading.value = true
         viewModelScope.launch {
 

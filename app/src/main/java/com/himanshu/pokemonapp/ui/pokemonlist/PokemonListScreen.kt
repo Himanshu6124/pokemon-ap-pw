@@ -13,7 +13,6 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
@@ -21,13 +20,15 @@ import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -56,17 +57,21 @@ fun PokemonListScreen(
     val isLoading by viewModel.isLoading.observeAsState(true)
     val errorMessage by viewModel.errorMessage.observeAsState(null)
     val listState = rememberLazyGridState()
+    val snackBarHostState = remember { SnackbarHostState() }
 
-    // Handle error messages with a Snackbar
-    errorMessage?.let {
-        Snackbar(
-            modifier = Modifier.padding(8.dp)
-        ) { Text(it) }
+    LaunchedEffect(key1 = errorMessage) {
+        errorMessage?.let {
+            snackBarHostState.showSnackbar(
+                message = errorMessage!!,
+                duration = SnackbarDuration.Short,
+            )
+        }
     }
 
     Scaffold(
-        topBar = { TopBar() }
-    ) { paddingValues ->
+        topBar = { TopBar() },
+        snackbarHost = { SnackbarHost(hostState = snackBarHostState) },
+        ) { paddingValues ->
 
         Box(
             modifier = Modifier
@@ -121,7 +126,9 @@ fun PokemonListItem(pokemon: Pokemon, imageUrl: String, onClick: () -> Unit) {
 
     ) {
         Column(
-            modifier = Modifier.fillMaxWidth().height(200.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(200.dp),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -151,7 +158,7 @@ fun TopBar() {
     CenterAlignedTopAppBar(title = {
         Text(
             text = "Pokemon List",
-            style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold)
+            style = MaterialTheme.typography.headlineLarge.copy(fontWeight = FontWeight.Bold)
         )
     })
 }
