@@ -12,6 +12,7 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object RepositoryModule {
 
+    /* Provides an instance of PokemonRepository */
     @Provides
     @Singleton
     fun provideRepository(apiService: PokemonApiService): PokemonRepository {

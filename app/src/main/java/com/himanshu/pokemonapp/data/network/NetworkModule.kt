@@ -20,48 +20,61 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
 
-    private const val BASE_URL = "https://pokeapi.co/api/v2/"
-    private const val CACHE_SIZE = (10 * 1024 * 1024).toLong() // 10 MB
-    private const val MAX_AGE = 300 // 5 minutes
-    private const val MAX_STALE = 60 * 60 * 24 * 7 // 1 week
+    private const val BASE_URL = "https://pokeapi.co/api/v2/" // Base url for end point
+    private const val CACHE_SIZE_BYTES = 10 * 1024 * 1024L // 10 MB cache size
+    private const val MAX_AGE_SECONDS = 300 // 5 minutes max age for cache
+    private const val MAX_STALE_SECONDS = 60 * 60 * 24 * 7 // 1 week max stale for cache
 
+    /* Provides Retrofit instance configured with base URL, Gson converter, and OkHttpClient */
     @Provides
     @Singleton
-    fun provideRetrofit(@ApplicationContext context: Context, cache: Cache): Retrofit = Retrofit.Builder()
-        .baseUrl(BASE_URL)
-        .addConverterFactory(GsonConverterFactory.create())
-        .client(provideOkHttpClient(context, cache))
-        .build()
+    fun provideRetrofit(@ApplicationContext context: Context, cache: Cache): Retrofit {
+        return Retrofit.Builder()
+            .baseUrl(BASE_URL)
+            .addConverterFactory(GsonConverterFactory.create())
+            .client(provideOkHttpClient(context, cache))
+            .build()
+    }
 
+    /* Provides Cache instance with specified size, located in the app's cache directory */
     @Provides
     @Singleton
     fun provideCache(@ApplicationContext context: Context): Cache {
-        return Cache(File(context.cacheDir, "http-cache"), CACHE_SIZE)
+        val cacheDir = File(context.cacheDir, "http-cache")
+        return Cache(cacheDir, CACHE_SIZE_BYTES)
     }
 
+    /* Provides OkHttpClient instance with cache interceptor based on network availability */
     private fun provideOkHttpClient(context: Context, cache: Cache): OkHttpClient {
         return OkHttpClient.Builder()
             .cache(cache)
             .addInterceptor { chain ->
-                var request = chain.request()
-                request = if (hasNetwork(context))
-                    request.newBuilder().header("Cache-Control", "public, max-age=$MAX_AGE").build()
-                else
-                    request.newBuilder().header("Cache-Control", "public, only-if-cached, max-stale=$MAX_STALE").build()
+                val request = chain.request().newBuilder().apply {
+                    if (hasNetwork(context)) {
+                        // Use max-age if network is available
+                        header("Cache-Control", "public, max-age=$MAX_AGE_SECONDS")
+                    } else {
+                        // Use max-stale if network is unavailable
+                        header("Cache-Control", "public, only-if-cached, max-stale=$MAX_STALE_SECONDS")
+                    }
+                }.build()
                 chain.proceed(request)
             }
             .build()
     }
 
-    private fun hasNetwork(@ApplicationContext context: Context): Boolean {
+    /* Checks if the device has an active internet connection */
+    private fun hasNetwork(context: Context): Boolean {
         val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         val network = connectivityManager.activeNetwork ?: return false
         val capabilities = connectivityManager.getNetworkCapabilities(network) ?: return false
         return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
     }
 
+    /* Provides PokemonApiService instance created by Retrofit */
     @Provides
     @Singleton
-    fun providePokemonApiService(retrofit: Retrofit): PokemonApiService = retrofit.create(PokemonApiService::class.java)
-
+    fun providePokemonApiService(retrofit: Retrofit): PokemonApiService {
+        return retrofit.create(PokemonApiService::class.java)
+    }
 }
