@@ -34,7 +34,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -63,9 +65,15 @@ fun PokemonDetailScreen(
     val errorMessage by viewModel.errorMessage.observeAsState(null)
     val snackBarHostState = remember { SnackbarHostState() }
 
-    // Load Pokémon details when screen is first displayed
+    /* Load Pokémon details when screen is first displayed
+    * Only load the Pokémon detail if it hasn't been loaded yet */
+    val hasLoadedDetail = rememberSaveable { mutableStateOf(false) }
+
     LaunchedEffect(pokemonId) {
-        viewModel.loadPokemonDetail(pokemonId)
+        if (!hasLoadedDetail.value) {
+            viewModel.loadPokemonDetail(pokemonId)
+            hasLoadedDetail.value = true
+        }
     }
 
     // Show error message in a SnackBar if there's any

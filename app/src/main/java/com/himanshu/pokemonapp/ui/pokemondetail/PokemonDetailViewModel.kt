@@ -38,6 +38,7 @@ class PokemonDetailViewModel @Inject constructor(
      * Updates LiveData and handles any errors that occur during the network request.
      */
     fun loadPokemonDetail(id: Int) {
+        Log.d(logTag, "loading more data")
         viewModelScope.launch {
             try {
                 _isLoading.postValue(true) // Set loading state to true
