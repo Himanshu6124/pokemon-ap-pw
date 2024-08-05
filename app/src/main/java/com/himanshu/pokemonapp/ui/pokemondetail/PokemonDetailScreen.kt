@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -82,7 +83,11 @@ fun PokemonDetailScreen(
         snackbarHost = { SnackbarHost(hostState = snackBarHostState) }
     ) { paddingValues ->
 
-        Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
             if (isLoading) {
                 // Display a progress indicator while loading
                 CircularProgressIndicator(
@@ -92,8 +97,12 @@ fun PokemonDetailScreen(
                 )
             } else {
                 // Display Pokémon details when available
-                pokemonDetail?.let { detail ->
-                    PokemonDetailCard(pokemonDetail = detail)
+                LazyColumn {
+                    item {
+                        pokemonDetail?.let { detail ->
+                            PokemonDetailCard(pokemonDetail = detail)
+                        }
+                    }
                 }
             }
         }
@@ -168,7 +177,10 @@ fun PokemonDetailCard(pokemonDetail: PokemonDetail) {
                 )
                 Text(
                     text = "Height: ${pokemonDetail.height}",
-                    style = MaterialTheme.typography.bodyMedium.copy(fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold
+                    )
                 )
             }
 
@@ -182,8 +194,10 @@ fun PokemonDetailCard(pokemonDetail: PokemonDetail) {
 
 @Composable
 fun PokemonAbilities(abilities: List<SingleAbility> = emptyList()) {
-    val enterTransition = fadeIn(tween(durationMillis = 500)) + slideInVertically(tween(durationMillis = 500))
-    val exitTransition = fadeOut(tween(durationMillis = 500)) + slideOutVertically(tween(durationMillis = 500))
+    val enterTransition =
+        fadeIn(tween(durationMillis = 500)) + slideInVertically(tween(durationMillis = 500))
+    val exitTransition =
+        fadeOut(tween(durationMillis = 500)) + slideOutVertically(tween(durationMillis = 500))
 
     AnimatedVisibility(
         visible = abilities.isNotEmpty(),
