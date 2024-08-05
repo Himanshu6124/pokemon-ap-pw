@@ -9,6 +9,7 @@ data class PokemonDetail(
     val height: Int,
     val sprites: Sprites,
     val abilities: List<SingleAbility>,
+    val stats: List<Stat>
 )
 
 data class Ability(val name :String, val url : String)
@@ -28,4 +29,14 @@ data class Sprites(
     val frontDefault: String,
     @SerializedName("front_shiny")
     val frontShiny: String
+)
+
+data class Stat(
+    @SerializedName("base_stat")
+    val baseStat: Int,
+    val stat: StatDetail
+)
+
+data class StatDetail(
+    val name: String
 )
